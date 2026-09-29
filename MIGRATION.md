@@ -153,7 +153,50 @@ implementation("io.swagger.core.v3:swagger-rest:3.0.0")
 implementation("io.swagger.core.v3:swagger-rest-servlet-initializer:3.0.0")
 ```
 
-**Migration:** Update both artifact IDs in your build file.
+**Migration:** Update both artifact IDs in your build file. The REST Java API also moved:
+
+| 2.x package | 3.0 package |
+|---|---|
+| `io.swagger.v3.jaxrs2` | `io.swagger.v3.rest` |
+| `io.swagger.v3.jaxrs2.ext` | `io.swagger.v3.rest.ext` |
+| `io.swagger.v3.jaxrs2.util` | `io.swagger.v3.rest.util` |
+| `io.swagger.v3.jaxrs2.integration` | `io.swagger.v3.rest.integration` |
+| `io.swagger.v3.jaxrs2.integration.api` | `io.swagger.v3.rest.integration.api` |
+| `io.swagger.v3.jaxrs2.integration.resources` | `io.swagger.v3.rest.integration.resources` |
+| `io.swagger.v3.jaxrs2.integration.servlet` | `io.swagger.v3.rest.integration.servlet` |
+
+Seven public types also changed names. Use the new package in the table above for each type.
+
+| 2.x type | 3.0 type |
+|---|---|
+| `JaxrsOpenApiContextBuilder` | `RestOpenApiContextBuilder` |
+| `JaxrsOpenApiContext` | `RestOpenApiContext` |
+| `JaxrsAnnotationScanner` | `RestAnnotationScanner` |
+| `JaxrsApplicationScanner` | `RestApplicationScanner` |
+| `JaxrsApplicationAndAnnotationScanner` | `RestApplicationAndAnnotationScanner` |
+| `JaxrsApplicationAndResourcePackagesAnnotationScanner` | `RestApplicationAndResourcePackagesAnnotationScanner` |
+| `JaxrsOpenApiScanner` | `RestOpenApiScanner` |
+
+Update Java imports, reflective class names, scanner configuration, and servlet declarations. For example:
+
+```xml
+<servlet>
+  <servlet-name>openapi</servlet-name>
+  <servlet-class>io.swagger.v3.rest.integration.OpenApiServlet</servlet-class>
+  <init-param>
+    <param-name>openApi.configuration.resourcePackages</param-name>
+    <param-value>com.example.resources</param-value>
+  </init-param>
+</servlet>
+```
+
+Custom `OpenAPIExtension` providers must import `io.swagger.v3.rest.ext.OpenAPIExtension` and
+rename their service descriptor from
+`META-INF/services/io.swagger.v3.jaxrs2.ext.OpenAPIExtension` to
+`META-INF/services/io.swagger.v3.rest.ext.OpenAPIExtension`. Keep the provider class name in
+the descriptor synchronized with the implementation package. Explicit JPMS `requires` entries
+must change from `io.swagger.v3.jaxrs2` to `io.swagger.v3.rest`, or from
+`io.swagger.v3.jaxrs2.integration.servlet` to `io.swagger.v3.rest.integration.servlet`.
 
 ---
 
@@ -548,6 +591,7 @@ See [ObjectMapperProcessor — method signatures changed](#objectmapperprocessor
 - [ ] `io.swagger.core.v3` dependencies updated to 3.0.0
 - [ ] `swagger-jaxrs2` dependency renamed to `swagger-rest`
 - [ ] `swagger-jaxrs2-servlet-initializer-v2` dependency renamed to `swagger-rest-servlet-initializer`
+- [ ] REST imports, seven renamed types, servlet configuration, extension service descriptors, and JPMS `requires` entries updated to `io.swagger.v3.rest`
 - [ ] `swagger-java17-support` dependency removed (Record support is now built in)
 - [ ] Jakarta REST API updated to `jakarta.ws.rs-api:3.1.0`
 - [ ] Jakarta Servlet API updated to `jakarta.servlet-api:6.0.0`
